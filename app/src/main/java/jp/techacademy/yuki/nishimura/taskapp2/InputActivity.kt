@@ -1,10 +1,14 @@
 package jp.techacademy.yuki.nishimura.taskapp2
 
+import android.app.AlarmManager
 import android.app.DatePickerDialog
+import android.app.PendingIntent
 import android.app.TimePickerDialog
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import io.realm.Realm
 import jp.techacademy.yuki.nishimura.taskapp2.MainActivity.Companion.EXTRA_TASK
@@ -125,5 +129,17 @@ class InputActivity : AppCompatActivity() {
 
         realm.commitTransaction()
         realm.close()
+
+        val resultIntent = Intent(applicationContext, TaskAlarmReceiver::class.java)
+        resultIntent.putExtra(EXTRA_TASK, mTask!!.id)
+        val resultPendingIntent = PendingIntent.getBroadcast(
+            this,
+            mTask!!.id,
+            resultIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, resultPendingIntent)
     }
 }

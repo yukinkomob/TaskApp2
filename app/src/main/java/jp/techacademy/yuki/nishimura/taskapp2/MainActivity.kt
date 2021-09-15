@@ -1,18 +1,16 @@
 package jp.techacademy.yuki.nishimura.taskapp2
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity
-import android.view.Menu
-import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import io.realm.Realm
 import io.realm.RealmChangeListener
 import io.realm.Sort
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mRealm: Realm
@@ -63,6 +61,17 @@ class MainActivity : AppCompatActivity() {
                 mRealm.beginTransaction()
                 results.deleteAllFromRealm()
                 mRealm.commitTransaction()
+
+                val resultIntent = Intent(applicationContext, TaskAlarmReceiver::class.java)
+                val resultPendingIntent = PendingIntent.getBroadcast(
+                    this,
+                    task.id,
+                    resultIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
+
+                val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                alarmManager.cancel(resultPendingIntent)
 
                 reloadListView()
             }
