@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import io.realm.Realm
 import io.realm.RealmChangeListener
 import io.realm.Sort
@@ -39,6 +40,11 @@ class MainActivity : AppCompatActivity() {
         mRealm.addChangeListener(mRealmListener)
 
         mTaskAdapter = TaskAdapter(this)
+
+        search_category_edit.addTextChangedListener {
+            val searchText = search_category_edit.text.toString()
+            reloadListView(searchText)
+        }
 
         listView1.setOnItemClickListener { parent, _, position, _ ->
             // 入力・編集する画面に遷移させる
@@ -87,12 +93,20 @@ class MainActivity : AppCompatActivity() {
         reloadListView()
     }
 
-    private fun reloadListView() {
-        val taskRealmResults =
-            mRealm.where(Task::class.java).findAll().sort("date", Sort.DESCENDING)
-        mTaskAdapter.mTaskList = mRealm.copyFromRealm(taskRealmResults)
-        listView1.adapter = mTaskAdapter
-        mTaskAdapter.notifyDataSetChanged()
+    private fun reloadListView(searchText: String? = null) {
+        if (searchText == null || searchText.isEmpty()) {
+            val taskRealmResults =
+                mRealm.where(Task::class.java).findAll().sort("date", Sort.DESCENDING)
+            mTaskAdapter.mTaskList = mRealm.copyFromRealm(taskRealmResults)
+            listView1.adapter = mTaskAdapter
+            mTaskAdapter.notifyDataSetChanged()
+        } else {
+            val taskRealmResults =
+                mRealm.where(Task::class.java).equalTo("category", searchText).findAll().sort("date", Sort.DESCENDING)
+            mTaskAdapter.mTaskList = mRealm.copyFromRealm(taskRealmResults)
+            listView1.adapter = mTaskAdapter
+            mTaskAdapter.notifyDataSetChanged()
+        }
     }
 
     override fun onDestroy() {
