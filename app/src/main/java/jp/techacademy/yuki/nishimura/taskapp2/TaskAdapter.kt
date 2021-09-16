@@ -31,10 +31,11 @@ class TaskAdapter(context: Context) : BaseAdapter() {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val view: View =
-            convertView ?: mLayoutInflater.inflate(android.R.layout.simple_list_item_2, null)
+            convertView ?: mLayoutInflater.inflate(R.layout.task_list_item, null)
 
-        val textView1 = view.findViewById<TextView>(android.R.id.text1)
-        val textView2 = view.findViewById<TextView>(android.R.id.text2)
+        val textView1 = view.findViewById<TextView>(R.id.text1)
+        val textView2 = view.findViewById<TextView>(R.id.text2)
+        val categoryText = view.findViewById<TextView>(R.id.category_text)
 
         // 後でTaskクラスから情報を取得するように変更する
         textView1.text = mTaskList[position].title
@@ -42,6 +43,8 @@ class TaskAdapter(context: Context) : BaseAdapter() {
         val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.JAPANESE)
         val date = mTaskList[position].date
         textView2.text = simpleDateFormat.format(date)
+
+        categoryText.text = mTaskList[position].category
 
         return view
     }
