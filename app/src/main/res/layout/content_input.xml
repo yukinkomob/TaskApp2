@@ -18,18 +18,33 @@
         android:layout_height="wrap_content"
         android:hint="タイトル" />
 
-    <EditText
-        android:id="@+id/category_edit_text"
+    <LinearLayout
+        android:id="@+id/category_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/title_edit_text"
-        android:hint="カテゴリ" />
+        android:orientation="horizontal">
+
+        <Spinner
+            android:id="@+id/category_spinner"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="0.8" />
+
+        <Button
+            android:id="@+id/register_category_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+            android:text=" + " />
+
+    </LinearLayout>
 
     <EditText
         android:id="@+id/content_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/category_edit_text"
+        android:layout_below="@id/category_layout"
         android:hint="内容" />
 
     <Button

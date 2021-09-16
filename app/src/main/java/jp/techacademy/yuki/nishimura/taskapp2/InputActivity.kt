@@ -8,9 +8,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import io.realm.Realm
+import jp.techacademy.yuki.nishimura.taskapp2.CategoryInputActivity.Companion.RESULT_CODE_CATEGORY_INPUT_ADDED
 import jp.techacademy.yuki.nishimura.taskapp2.MainActivity.Companion.EXTRA_TASK
 import kotlinx.android.synthetic.main.content_input.*
 import java.util.*
@@ -24,32 +26,52 @@ class InputActivity : AppCompatActivity() {
     private var mMinute = 0
     private var mTask: Task? = null
 
+    companion object {
+        const val REQUEST_CODE_CATEGORY_INPUT = 100
+    }
+
     private val mOnDateClickListener = View.OnClickListener {
-        val datePickerDialog = DatePickerDialog(this,
+        val datePickerDialog = DatePickerDialog(
+            this,
             DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
                 mYear = year
                 mMonth = month
                 mDay = dayOfMonth
-                val dateString = mYear.toString() + "/" + String.format("%02d", mMonth + 1) + "/" + String.format("%02d", mDay)
+                val dateString = mYear.toString() + "/" + String.format(
+                    "%02d",
+                    mMonth + 1
+                ) + "/" + String.format("%02d", mDay)
                 date_button.text = dateString
-            }, mYear, mMonth, mDay)
+            }, mYear, mMonth, mDay
+        )
         datePickerDialog.show()
     }
 
     private val mOnTimeClickListener = View.OnClickListener {
-        val timePickerDialog = TimePickerDialog(this,
+        val timePickerDialog = TimePickerDialog(
+            this,
             TimePickerDialog.OnTimeSetListener { _, hour, minute ->
                 mHour = hour
                 mMinute = minute
                 val timeString = String.format("%02d", mHour) + ":" + String.format("%02d", mMinute)
                 times_button.text = timeString
-            }, mHour, mMinute, false)
+            }, mHour, mMinute, false
+        )
         timePickerDialog.show()
     }
 
     private val mOnDoneClickListener = View.OnClickListener {
         addTask()
         finish()
+    }
+
+    private val mOnRegisterCategoryClickListener = View.OnClickListener {
+        transitCategoryInput()
+    }
+
+    private fun transitCategoryInput() {
+        val intent = Intent(this, CategoryInputActivity::class.java)
+        startActivityForResult(intent, REQUEST_CODE_CATEGORY_INPUT)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,11 +87,15 @@ class InputActivity : AppCompatActivity() {
         date_button.setOnClickListener(mOnDateClickListener)
         times_button.setOnClickListener(mOnTimeClickListener)
         done_button.setOnClickListener(mOnDoneClickListener)
+        register_category_button.setOnClickListener(mOnRegisterCategoryClickListener)
 
         val intent = intent
         val taskId = intent.getIntExtra(EXTRA_TASK, -1)
         val realm = Realm.getDefaultInstance()
         mTask = realm.where(Task::class.java).equalTo("id", taskId).findFirst()
+
+        updateCategorySpinner()
+
         realm.close()
 
         if (mTask == null) {
@@ -81,7 +107,14 @@ class InputActivity : AppCompatActivity() {
             mMinute = calendar.get(Calendar.MINUTE)
         } else {
             title_edit_text.setText(mTask!!.title)
-            category_edit_text.setText(mTask!!.category)
+            // TODO タスクのカテゴリをSpinnerで表示する
+            var position = -1
+            for (i in 0 until category_spinner.adapter.count) {
+                if (category_spinner.adapter.getItem(i).equals(mTask!!.category)) {
+                    position = i
+                }
+            }
+            category_spinner.setSelection(position)
             content_edit_text.setText(mTask!!.contents)
 
             val calendar = Calendar.getInstance()
@@ -92,12 +125,37 @@ class InputActivity : AppCompatActivity() {
             mHour = calendar.get(Calendar.HOUR_OF_DAY)
             mMinute = calendar.get(Calendar.MINUTE)
 
-            val dateString = mYear.toString() + "/" + String.format("%02d", mMonth + 1) + "/" + String.format("%02d", mDay)
+            val dateString = mYear.toString() + "/" + String.format(
+                "%02d",
+                mMonth + 1
+            ) + "/" + String.format("%02d", mDay)
             val timeString = String.format("%02d", mHour) + ":" + String.format("%02d", mMinute)
 
             date_button.text = dateString
             times_button.text = timeString
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_CATEGORY_INPUT && resultCode == RESULT_CODE_CATEGORY_INPUT_ADDED) {
+            updateCategorySpinner()
+        }
+    }
+
+    private fun updateCategorySpinner() {
+        val realm = Realm.getDefaultInstance()
+        val categoryList = realm.where(Category::class.java).findAll().map {
+            it.name
+        }
+        val adapter = ArrayAdapter<String>(
+            this,
+            android.R.layout.simple_spinner_item,
+            categoryList
+        )
+        category_spinner.adapter = adapter
+
+        realm.close()
     }
 
     private fun addTask() {
@@ -118,7 +176,7 @@ class InputActivity : AppCompatActivity() {
         }
 
         val title = title_edit_text.text.toString()
-        val category = category_edit_text.text.toString()
+        val category = category_spinner.selectedItem.toString()
         val content = content_edit_text.text.toString()
 
         mTask!!.title = title
