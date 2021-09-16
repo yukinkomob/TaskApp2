@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity() {
             mTaskAdapter.notifyDataSetChanged()
         } else {
             val taskRealmResults =
-                mRealm.where(Task::class.java).equalTo("category", searchText).findAll().sort("date", Sort.DESCENDING)
+                mRealm.where(Task::class.java).beginsWith("category", searchText).findAll().sort("date", Sort.DESCENDING)
             mTaskAdapter.mTaskList = mRealm.copyFromRealm(taskRealmResults)
             listView1.adapter = mTaskAdapter
             mTaskAdapter.notifyDataSetChanged()

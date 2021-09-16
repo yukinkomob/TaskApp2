@@ -10,12 +10,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class TaskAdapter(context: Context) : BaseAdapter() {
-    private val mLayoutInflater: LayoutInflater
+    private val mLayoutInflater: LayoutInflater = LayoutInflater.from(context)
     var mTaskList = mutableListOf<Task>()
-
-    init {
-        this.mLayoutInflater = LayoutInflater.from(context)
-    }
 
     override fun getCount(): Int {
         return mTaskList.size
