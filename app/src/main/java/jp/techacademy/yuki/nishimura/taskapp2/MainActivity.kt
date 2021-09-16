@@ -15,11 +15,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mRealm: Realm
-    private val mRealmListener = object : RealmChangeListener<Realm> {
-        override fun onChange(t: Realm) {
-            reloadListView()
-        }
-    }
+    private val mRealmListener = RealmChangeListener<Realm> { reloadListView() }
 
     private lateinit var mTaskAdapter: TaskAdapter
 
